@@ -52,8 +52,9 @@ Open -> In Progress -> Fixed -> Verified -> Closed
 Fixed -> Reopened, Verified -> Reopened, Reopened -> In Progress
 ```
 
-Closed is final. The detail page only offers allowed next statuses, and the
-backend rejects anything else (for example Open -> Closed) with HTTP 400.
+Closed is final. The detail page shows one button per allowed next status,
+and the backend rejects anything else (for example Open -> Closed) with
+HTTP 400.
 
 ## Known limitations (current build)
 

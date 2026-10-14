@@ -40,15 +40,12 @@
   {% if targets %}
     <form method="post" action="{{ url_for('main.issue_status', issue_id=issue.id) }}">
       <input type="hidden" name="version" value="{{ issue.version }}">
-      <div class="field">
-        <label for="to_status">New status (required)</label>
-        <select id="to_status" name="to_status">
-          {% for t in targets %}
-            <option value="{{ t }}">{{ t }}</option>
-          {% endfor %}
-        </select>
+      <p>Current status: {{ issue.status }}.</p>
+      <div class="actions">
+        {% for t in targets %}
+          <button type="submit" name="to_status" value="{{ t }}">{{ 'Reopen issue' if t == 'Reopened' else 'Mark as ' ~ t }}</button>
+        {% endfor %}
       </div>
-      <button type="submit">Change status</button>
     </form>
   {% else %}
     <p>Closed is final; no further status changes. A regression is a new issue.</p>

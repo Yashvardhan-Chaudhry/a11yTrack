@@ -81,8 +81,9 @@ def test_stale_version_gets_409_and_changes_nothing(client, app):
 def test_detail_offers_only_allowed_targets(client):
     login(client, ALICE)
     page = client.get(f"/issues/{ALICE_ISSUE}").data.decode()
-    assert '<option value="In Progress">' in page
-    assert '<option value="Closed">' not in page
+    assert 'name="to_status" value="In Progress"' in page
+    assert 'value="Closed"' not in page
+    assert page.count('name="to_status"') == 1
 
 
 def test_closed_issue_has_no_status_form(client, app):

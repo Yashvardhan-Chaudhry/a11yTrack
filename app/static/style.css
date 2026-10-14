@@ -52,6 +52,7 @@ fieldset { border: 1px solid var(--border); padding: .75rem 1rem; margin: 0 0 1r
 .details dt { font-weight: 600; }
 .details dd { margin: 0; overflow-wrap: anywhere; }
 .description { white-space: pre-wrap; max-width: 40rem; }
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; }
 
 table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
 caption { text-align: left; font-weight: 600; padding: .5rem 0; }

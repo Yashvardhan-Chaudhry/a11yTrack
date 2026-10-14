@@ -84,7 +84,7 @@ a11ytrack/
 
 ## Current state
 - Slice 1 + 2 done: models, seed, sign-in, list + filters, create, detail page
-  (fields, status-change select of allowed targets only, status history table),
+  (fields, one status-change button per allowed target, status history table),
   edit (no status field), `ALLOWED_TRANSITIONS` in workflow.py with 400 on
   rejection, status_changes written in the same transaction, ownership via
   `get_owned_issue_or_404()` (404 never 403), optimistic lock -> 409 on edit
