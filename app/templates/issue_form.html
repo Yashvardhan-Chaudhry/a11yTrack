@@ -1,2 +1,72 @@
 {% extends "base.html" %}
-{%# issue_form — not implemented yet #%}
+{% block title %}New issue{% endblock %}
+{% block content %}
+  <h1>New issue</h1>
+
+  {% if errors %}
+    <div id="error-summary" class="error-summary" tabindex="-1" autofocus role="alert">
+      <h2>There is a problem</h2>
+      <ul>
+        {% for field, message in errors.items() %}
+          <li><a href="#{{ field }}">{{ message }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  {% macro error_attrs(field) -%}
+    {% if field in errors %}aria-describedby="{{ field }}-error" aria-invalid="true"{% endif %}
+  {%- endmacro %}
+  {% macro error_text(field) -%}
+    {% if field in errors %}<p id="{{ field }}-error" class="error">{{ errors[field] }}</p>{% endif %}
+  {%- endmacro %}
+
+  <form method="post" action="{{ url_for('main.issue_new') }}" novalidate>
+    <div class="field">
+      <label for="title">Title (required)</label>
+      {{ error_text('title') }}
+      <input type="text" id="title" name="title" value="{{ values.title }}" {{ error_attrs('title') }}>
+    </div>
+
+    <div class="field">
+      <label for="page_url">Page URL (required)</label>
+      <p id="page_url-hint" class="hint">Full address starting with http:// or https://</p>
+      {{ error_text('page_url') }}
+      <input type="url" id="page_url" name="page_url" value="{{ values.page_url }}"
+             aria-describedby="page_url-hint{% if 'page_url' in errors %} page_url-error{% endif %}"
+             {% if 'page_url' in errors %}aria-invalid="true"{% endif %}>
+    </div>
+
+    <div class="field">
+      <label for="severity">Severity (required)</label>
+      {{ error_text('severity') }}
+      <select id="severity" name="severity" {{ error_attrs('severity') }}>
+        <option value="" {% if not values.severity %}selected{% endif %}>Choose a severity</option>
+        {% for s in severities %}
+          <option value="{{ s }}" {% if s == values.severity %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="wcag_criterion">WCAG criterion</label>
+      <p id="wcag_criterion-hint" class="hint">Choose from the list or type your own, for example 1.1.1 Non-text Content</p>
+      {{ error_text('wcag_criterion') }}
+      <input type="text" id="wcag_criterion" name="wcag_criterion" list="wcag-list" value="{{ values.wcag_criterion }}"
+             aria-describedby="wcag_criterion-hint{% if 'wcag_criterion' in errors %} wcag_criterion-error{% endif %}"
+             {% if 'wcag_criterion' in errors %}aria-invalid="true"{% endif %}>
+      <datalist id="wcag-list">
+        {% for c in wcag_criteria %}<option value="{{ c }}">{% endfor %}
+      </datalist>
+    </div>
+
+    <div class="field">
+      <label for="description">Description</label>
+      {{ error_text('description') }}
+      <textarea id="description" name="description" rows="5" {{ error_attrs('description') }}>{{ values.description }}</textarea>
+    </div>
+
+    <button type="submit">Save issue</button>
+    <a href="{{ url_for('main.issues_list') }}">Cancel</a>
+  </form>
+{% endblock %}

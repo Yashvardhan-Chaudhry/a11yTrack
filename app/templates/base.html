@@ -8,9 +8,30 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
-  <header>
+  <header class="site-header">
     <p class="brand">a11yTrack</p>
+    <nav aria-label="Main">
+      <ul>
+        {% if current_user %}
+          <li><a href="{{ url_for('main.issues_list') }}">Issues</a></li>
+          <li><a href="{{ url_for('main.issue_new') }}">New issue</a></li>
+          <li class="user">
+            <span>Signed in as {{ current_user.display_name }}</span>
+            <form method="post" action="{{ url_for('main.logout') }}">
+              <button type="submit">Sign out</button>
+            </form>
+          </li>
+        {% else %}
+          <li><a href="{{ url_for('main.login') }}">Sign in</a></li>
+        {% endif %}
+      </ul>
+    </nav>
   </header>
+  <div class="status" role="status" aria-live="polite">
+    {% for message in get_flashed_messages() %}
+      <p>{{ message }}</p>
+    {% endfor %}
+  </div>
   <main id="main" tabindex="-1">
     {% block content %}{% endblock %}
   </main>

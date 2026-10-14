@@ -1,2 +1,71 @@
 {% extends "base.html" %}
-{%# issues_list — not implemented yet #%}
+{% block title %}Your issues{% endblock %}
+{% block content %}
+  <h1>Your issues</h1>
+  <p><a href="{{ url_for('main.issue_new') }}">Create a new issue</a></p>
+
+  <form method="get" action="{{ url_for('main.issues_list') }}" class="filters">
+    <fieldset>
+      <legend>Filter issues</legend>
+      <div class="field">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <option value="" {% if not selected_status %}selected{% endif %}>All statuses</option>
+          {% for s in statuses %}
+            <option value="{{ s }}" {% if s == selected_status %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="severity">Severity</label>
+        <select id="severity" name="severity">
+          <option value="" {% if not selected_severity %}selected{% endif %}>All severities</option>
+          {% for s in severities %}
+            <option value="{{ s }}" {% if s == selected_severity %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit">Apply filters</button>
+      {% if selected_status or selected_severity %}
+        <a href="{{ url_for('main.issues_list') }}">Clear filters</a>
+      {% endif %}
+    </fieldset>
+  </form>
+
+  {% set filter_text = [] %}
+  {% if selected_status %}{% set _ = filter_text.append('status ' ~ selected_status) %}{% endif %}
+  {% if selected_severity %}{% set _ = filter_text.append('severity ' ~ selected_severity) %}{% endif %}
+
+  {% if issues %}
+    <table>
+      <caption>
+        {{ issues|length }} issue{{ '' if issues|length == 1 else 's' }}
+        {% if filter_text %}filtered by {{ filter_text|join(' and ') }}{% endif %}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Title</th>
+          <th scope="col">Severity</th>
+          <th scope="col">Status</th>
+          <th scope="col">WCAG criterion</th>
+          <th scope="col">Page URL</th>
+          <th scope="col">Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for issue in issues %}
+          <tr>
+            <th scope="row">{{ issue.title }}</th>
+            <td>{{ issue.severity }}</td>
+            <td>{{ issue.status }}</td>
+            <td>{{ issue.wcag_criterion or 'Not set' }}</td>
+            <td class="url">{{ issue.page_url }}</td>
+            <td><time datetime="{{ issue.created_at.isoformat() }}Z">{{ issue.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No issues{% if filter_text %} match the filters {{ filter_text|join(' and ') }}{% else %} yet{% endif %}.</p>
+  {% endif %}
+{% endblock %}

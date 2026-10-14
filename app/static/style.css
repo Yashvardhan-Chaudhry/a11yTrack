@@ -1,6 +1,54 @@
-/* a11yTrack — base styles (accessibility pass comes later) */
-:root { font-family: system-ui, sans-serif; line-height: 1.5; }
-body { margin: 0; padding: 1rem; max-width: 60rem; }
+/* a11yTrack base styles. Full accessibility pass (contrast, 320px, 200%) is a later task. */
+:root {
+  --text: #1a1a1a;
+  --muted: #4a4a4a;      /* 8.6:1 on white */
+  --link: #0b3d91;
+  --focus: #0b3d91;
+  --error: #a4000f;      /* 7.6:1 on white */
+  --border: #5c5c5c;     /* 6.3:1 on white, passes 3:1 for UI */
+  --bg: #ffffff;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  color: var(--text);
+}
+body { margin: 0; padding: 1rem; max-width: 64rem; background: var(--bg); }
+
 .skip-link { position: absolute; left: -999px; top: 0; }
-.skip-link:focus { left: 1rem; top: 1rem; background: #fff; padding: .5rem; outline: 3px solid #000; }
-:focus-visible { outline: 3px solid #0b3d91; outline-offset: 2px; }
+.skip-link:focus {
+  left: 1rem; top: 1rem; background: #fff; color: var(--text);
+  padding: .5rem 1rem; outline: 3px solid var(--focus); z-index: 1;
+}
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+a { color: var(--link); }
+
+.site-header { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; border-bottom: 2px solid var(--border); padding-bottom: .5rem; }
+.brand { font-weight: 700; font-size: 1.25rem; margin: 0; }
+nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 1rem; margin: 0; padding: 0; align-items: center; }
+nav .user { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+nav form { display: inline; }
+
+.status p { background: #e8f1fb; border-left: 4px solid var(--link); padding: .5rem 1rem; margin: 1rem 0; }
+
+h1 { font-size: 1.75rem; }
+.field { margin-bottom: 1rem; max-width: 40rem; }
+label { display: block; font-weight: 600; margin-bottom: .25rem; }
+.hint { margin: 0 0 .25rem; color: var(--muted); }
+input, select, textarea, button {
+  font: inherit; padding: .4rem .5rem; border: 2px solid var(--border); border-radius: 3px; background: #fff; color: var(--text);
+}
+input, select, textarea { width: 100%; box-sizing: border-box; }
+button { cursor: pointer; background: var(--link); color: #fff; border-color: var(--link); padding: .5rem 1rem; }
+[aria-invalid="true"] { border-color: var(--error); }
+
+.error { color: var(--error); font-weight: 600; margin: 0 0 .25rem; }
+.error-summary { border: 3px solid var(--error); padding: 1rem; margin-bottom: 1.5rem; }
+.error-summary h2 { margin-top: 0; font-size: 1.25rem; }
+.error-summary a { color: var(--error); }
+
+fieldset { border: 1px solid var(--border); padding: .75rem 1rem; margin: 0 0 1rem; }
+.filters .field { display: inline-block; vertical-align: bottom; margin-right: 1rem; min-width: 12rem; }
+
+table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+caption { text-align: left; font-weight: 600; padding: .5rem 0; }
+th, td { border: 1px solid var(--border); padding: .5rem; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+thead th { background: #f0f0f0; }

@@ -83,7 +83,12 @@ a11ytrack/
 - NVDA 2026.2 at `C:\Program Files\NVDA\nvda.exe` (winget); Lighthouse via Chrome DevTools
 
 ## Current state
-- Repo initialised, skeleton committed, hello page renders via base.html. Models/routes/tests are stubs.
+- Slice 1 done: SQLAlchemy models (users, issues, status_changes), `seed.py`
+  (2 users x 4 issues + coherent status_changes rows), login via "sign in as"
+  select -> session cookie, issue list table with status/severity GET filters,
+  create form with `validate_issue()` -> inline errors + focused error summary.
+- Not yet: edit, workflow/ALLOWED_TRANSITIONS, status log page, detail page,
+  optimistic-lock check, tests, ARCHITECTURE.md, ACCESSIBILITY.md, final README.
 
 ## Planner (revised 18:40 Wed; ~2h behind original)
 | Slot | Task | Done when |
