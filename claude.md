@@ -89,7 +89,10 @@ a11ytrack/
   rejection, status_changes written in the same transaction, ownership via
   `get_owned_issue_or_404()` (404 never 403), optimistic lock -> 409 on edit
   and status change, titled `error.html` for 404s, pytest suite in `tests/`.
-- Not yet: accessibility pass, ARCHITECTURE.md, ACCESSIBILITY.md, final README.
+- Accessibility pass done: live-region re-announce script (only JS in app),
+  "Error: " page-title prefix on error states, 4-column list for 320px,
+  two-ring focus indicator, axe run on every page state.
+- Not yet: ARCHITECTURE.md, ACCESSIBILITY.md (NVDA findings), final README + AI note.
 
 ## Planner (revised 18:40 Wed; ~2h behind original)
 | Slot | Task | Done when |

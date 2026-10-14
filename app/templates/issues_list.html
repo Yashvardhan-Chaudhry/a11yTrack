@@ -47,8 +47,6 @@
           <th scope="col">Title</th>
           <th scope="col">Severity</th>
           <th scope="col">Status</th>
-          <th scope="col">WCAG criterion</th>
-          <th scope="col">Page URL</th>
           <th scope="col">Created</th>
         </tr>
       </thead>
@@ -58,8 +56,6 @@
             <th scope="row"><a href="{{ url_for('main.issue_detail', issue_id=issue.id) }}">{{ issue.title }}</a></th>
             <td>{{ issue.severity }}</td>
             <td>{{ issue.status }}</td>
-            <td>{{ issue.wcag_criterion or 'Not set' }}</td>
-            <td class="url">{{ issue.page_url }}</td>
             <td><time datetime="{{ issue.created_at.isoformat() }}Z">{{ issue.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></td>
           </tr>
         {% endfor %}

@@ -43,6 +43,7 @@ def test_create_with_empty_form_returns_400_with_error_summary(client):
     assert response.status_code == 400
     page = response.data.decode()
     assert 'id="error-summary"' in page
+    assert "<title>Error: New issue" in page
     assert 'href="#title"' in page and 'href="#page_url"' in page and 'href="#severity"' in page
     assert page.count('aria-invalid="true"') == 3
 

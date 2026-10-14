@@ -18,7 +18,9 @@ body { margin: 0; padding: 1rem; max-width: 64rem; background: var(--bg); }
   left: 1rem; top: 1rem; background: #fff; color: var(--text);
   padding: .5rem 1rem; outline: 3px solid var(--focus); z-index: 1;
 }
-:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+/* Two-ring focus indicator: white inner ring then dark outline, visible on white, grey and blue. */
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; box-shadow: 0 0 0 2px #fff; }
+button:focus-visible { outline-color: #1a1a1a; }
 a { color: var(--link); }
 
 .site-header { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; border-bottom: 2px solid var(--border); padding-bottom: .5rem; }

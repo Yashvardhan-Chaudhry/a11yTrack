@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ issue.title }}{% endblock %}
+{% block title %}{% if error %}Error: {% endif %}{{ issue.title }}{% endblock %}
 {% block content %}
   <h1>{{ issue.title }}</h1>
 

@@ -35,5 +35,16 @@
   <main id="main" tabindex="-1">
     {% block content %}{% endblock %}
   </main>
+  <script>
+    // Re-insert any page-load message into the live region so screen readers
+    // announce it. Content already present at load is often not announced.
+    (function () {
+      var region = document.querySelector('.status');
+      if (!region || !region.textContent.trim()) return;
+      var html = region.innerHTML;
+      region.innerHTML = '';
+      setTimeout(function () { region.innerHTML = html; }, 150);
+    })();
+  </script>
 </body>
 </html>

@@ -58,5 +58,4 @@ HTTP 400.
 
 ## Known limitations (current build)
 
-- Accessibility self-check (keyboard pass, axe, NVDA) not yet recorded.
 - ARCHITECTURE.md and ACCESSIBILITY.md not yet written.

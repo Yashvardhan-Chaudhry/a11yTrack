@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Edit issue' if mode == 'edit' else 'New issue' }}{% endblock %}
+{% block title %}{% if errors or conflict %}Error: {% endif %}{{ 'Edit issue' if mode == 'edit' else 'New issue' }}{% endblock %}
 {% block content %}
   <h1>{{ 'Edit issue' if mode == 'edit' else 'New issue' }}</h1>
 
