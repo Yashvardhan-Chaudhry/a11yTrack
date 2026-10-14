@@ -1,16 +1,23 @@
 {% extends "base.html" %}
-{% block title %}New issue{% endblock %}
+{% block title %}{{ 'Edit issue' if mode == 'edit' else 'New issue' }}{% endblock %}
 {% block content %}
-  <h1>New issue</h1>
+  <h1>{{ 'Edit issue' if mode == 'edit' else 'New issue' }}</h1>
 
-  {% if errors %}
+  {% if errors or conflict %}
     <div id="error-summary" class="error-summary" tabindex="-1" autofocus role="alert">
       <h2>There is a problem</h2>
-      <ul>
-        {% for field, message in errors.items() %}
-          <li><a href="#{{ field }}">{{ message }}</a></li>
-        {% endfor %}
-      </ul>
+      {% if conflict %}
+        <p>This issue was changed since you loaded it.
+          <a href="{{ url_for('main.issue_edit', issue_id=issue.id) }}">Reload the edit page</a>
+          to see the latest version, then make your change again.</p>
+      {% endif %}
+      {% if errors %}
+        <ul>
+          {% for field, message in errors.items() %}
+            <li><a href="#{{ field }}">{{ message }}</a></li>
+          {% endfor %}
+        </ul>
+      {% endif %}
     </div>
   {% endif %}
 
@@ -21,7 +28,13 @@
     {% if field in errors %}<p id="{{ field }}-error" class="error">{{ errors[field] }}</p>{% endif %}
   {%- endmacro %}
 
-  <form method="post" action="{{ url_for('main.issue_new') }}" novalidate>
+  <form method="post"
+        action="{{ url_for('main.issue_edit', issue_id=issue.id) if mode == 'edit' else url_for('main.issue_new') }}"
+        novalidate>
+    {% if mode == 'edit' %}
+      <input type="hidden" name="version" value="{{ version }}">
+    {% endif %}
+
     <div class="field">
       <label for="title">Title (required)</label>
       {{ error_text('title') }}
@@ -67,6 +80,10 @@
     </div>
 
     <button type="submit">Save issue</button>
-    <a href="{{ url_for('main.issues_list') }}">Cancel</a>
+    {% if mode == 'edit' %}
+      <a href="{{ url_for('main.issue_detail', issue_id=issue.id) }}">Cancel</a>
+    {% else %}
+      <a href="{{ url_for('main.issues_list') }}">Cancel</a>
+    {% endif %}
   </form>
 {% endblock %}

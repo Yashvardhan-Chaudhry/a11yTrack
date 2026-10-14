@@ -1,7 +1,7 @@
 """a11yTrack application factory."""
 import os
 
-from flask import Flask
+from flask import Flask, render_template
 
 from .models import db
 
@@ -27,6 +27,17 @@ def create_app(test_config: dict | None = None) -> Flask:
     @app.context_processor
     def inject_current_user():
         return {"current_user": get_current_user()}
+
+    @app.errorhandler(404)
+    def not_found(_error):
+        return (
+            render_template(
+                "error.html",
+                heading="Page not found",
+                message="There is no issue at this address, or it belongs to another user.",
+            ),
+            404,
+        )
 
     with app.app_context():
         db.create_all()

@@ -1,2 +1,85 @@
 {% extends "base.html" %}
-{%# issue_detail — not implemented yet #%}
+{% block title %}{{ issue.title }}{% endblock %}
+{% block content %}
+  <h1>{{ issue.title }}</h1>
+
+  {% if error %}
+    <div id="error-summary" class="error-summary" tabindex="-1" autofocus role="alert">
+      <h2>There is a problem</h2>
+      <p>{{ error }}
+        {% if 'Reload' in error %}<a href="{{ url_for('main.issue_detail', issue_id=issue.id) }}">Reload this page</a>{% endif %}
+      </p>
+    </div>
+  {% endif %}
+
+  <p><a href="{{ url_for('main.issue_edit', issue_id=issue.id) }}">Edit this issue</a></p>
+
+  <dl class="details">
+    <dt>Status</dt>
+    <dd>{{ issue.status }}</dd>
+    <dt>Severity</dt>
+    <dd>{{ issue.severity }}</dd>
+    <dt>WCAG criterion</dt>
+    <dd>{{ issue.wcag_criterion or 'Not set' }}</dd>
+    <dt>Page URL</dt>
+    <dd><a href="{{ issue.page_url }}">{{ issue.page_url }}</a></dd>
+    <dt>Created</dt>
+    <dd><time datetime="{{ issue.created_at.isoformat() }}Z">{{ issue.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></dd>
+    <dt>Updated</dt>
+    <dd><time datetime="{{ issue.updated_at.isoformat() }}Z">{{ issue.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></dd>
+  </dl>
+
+  <h2>Description</h2>
+  {% if issue.description %}
+    <p class="description">{{ issue.description }}</p>
+  {% else %}
+    <p>No description.</p>
+  {% endif %}
+
+  <h2>Change status</h2>
+  {% if targets %}
+    <form method="post" action="{{ url_for('main.issue_status', issue_id=issue.id) }}">
+      <input type="hidden" name="version" value="{{ issue.version }}">
+      <div class="field">
+        <label for="to_status">New status (required)</label>
+        <select id="to_status" name="to_status">
+          {% for t in targets %}
+            <option value="{{ t }}">{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit">Change status</button>
+    </form>
+  {% else %}
+    <p>Closed is final; no further status changes. A regression is a new issue.</p>
+  {% endif %}
+
+  <h2>Status history</h2>
+  {% if issue.status_changes %}
+    <table>
+      <caption>{{ issue.status_changes|length }} status change{{ '' if issue.status_changes|length == 1 else 's' }}, oldest first</caption>
+      <thead>
+        <tr>
+          <th scope="col">When</th>
+          <th scope="col">Changed by</th>
+          <th scope="col">From</th>
+          <th scope="col">To</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for change in issue.status_changes %}
+          <tr>
+            <td><time datetime="{{ change.changed_at.isoformat() }}Z">{{ change.changed_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></td>
+            <td>{{ change.actor.display_name }}</td>
+            <td>{{ change.from_status }}</td>
+            <td>{{ change.to_status }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No status changes yet.</p>
+  {% endif %}
+
+  <p><a href="{{ url_for('main.issues_list') }}">Back to your issues</a></p>
+{% endblock %}

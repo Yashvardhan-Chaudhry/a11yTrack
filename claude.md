@@ -26,8 +26,8 @@ Submit = reply to Archit's email with the repo link (reviewer access granted).
 | `README.md` | Setup, run, demo accounts, run tests, assumptions, known limitations, AI note | todo |
 | `ARCHITECTURE.md` | Part 1 — 9 sections + 3 Mermaid diagrams (PNG exported, tool named) | todo |
 | `ACCESSIBILITY.md` | Keyboard pass, automated check (axe/Lighthouse), NVDA notes, remaining issues | todo |
-| `tests/` | ≥2 meaningful: invalid transition rejected; cross-user access blocked | todo |
-| App | Flask + Jinja2 + SQLAlchemy + SQLite, runs locally | todo |
+| `tests/` | ≥2 meaningful: invalid transition rejected; cross-user access blocked | done |
+| App | Flask + Jinja2 + SQLAlchemy + SQLite, runs locally | done (a11y pass pending) |
 
 ## Stack (locked — see DECISIONS.md for why)
 - Python 3.x, Flask, Jinja2, Flask-SQLAlchemy, SQLite (dev) / PostgreSQL (prod design)
@@ -68,7 +68,7 @@ Optimistic locking: forms carry `version`; `UPDATE ... WHERE id=? AND version=?`
 ```
 a11ytrack/
   app/            __init__.py, models.py, routes.py, workflow.py, validation.py
-  app/templates/  base.html, login.html, issues_list.html, issue_form.html, issue_detail.html
+  app/templates/  base.html, login.html, issues_list.html, issue_form.html, issue_detail.html, error.html
   app/static/     style.css
   tests/          test_workflow.py, test_ownership.py, test_validation.py
   docs/           architecture.mmd, er.mmd, workflow.mmd + exported .png, brief.pdf
@@ -83,12 +83,13 @@ a11ytrack/
 - NVDA 2026.2 at `C:\Program Files\NVDA\nvda.exe` (winget); Lighthouse via Chrome DevTools
 
 ## Current state
-- Slice 1 done: SQLAlchemy models (users, issues, status_changes), `seed.py`
-  (2 users x 4 issues + coherent status_changes rows), login via "sign in as"
-  select -> session cookie, issue list table with status/severity GET filters,
-  create form with `validate_issue()` -> inline errors + focused error summary.
-- Not yet: edit, workflow/ALLOWED_TRANSITIONS, status log page, detail page,
-  optimistic-lock check, tests, ARCHITECTURE.md, ACCESSIBILITY.md, final README.
+- Slice 1 + 2 done: models, seed, sign-in, list + filters, create, detail page
+  (fields, status-change select of allowed targets only, status history table),
+  edit (no status field), `ALLOWED_TRANSITIONS` in workflow.py with 400 on
+  rejection, status_changes written in the same transaction, ownership via
+  `get_owned_issue_or_404()` (404 never 403), optimistic lock -> 409 on edit
+  and status change, titled `error.html` for 404s, pytest suite in `tests/`.
+- Not yet: accessibility pass, ARCHITECTURE.md, ACCESSIBILITY.md, final README.
 
 ## Planner (revised 18:40 Wed; ~2h behind original)
 | Slot | Task | Done when |

@@ -4,8 +4,8 @@ Accessibility issue tracker: log WCAG issues found on web pages, move them
 through a workflow, and keep a log of every status change. Built for the
 Unified Accessibility full-stack intern take-home.
 
-> Work in progress. Edit, status workflow, status log, tests and the full
-> accessibility pass are not in yet; see "Known limitations" below.
+> Work in progress. The accessibility pass, ARCHITECTURE.md and
+> ACCESSIBILITY.md are still to come; see "Known limitations" below.
 
 ## Run locally
 
@@ -34,8 +34,28 @@ No passwords. Pick a user on the sign-in page:
 
 Each user sees only their own issues.
 
+## Run the tests
+
+```
+python -m pytest -q
+```
+
+Tests run against an in-memory SQLite database and cover: an invalid status
+change is rejected with 400 and not logged; one user is blocked (404) from
+another user's issue on every route; backend validation; the optimistic-lock
+409 on stale edits and status changes.
+
+## Status workflow
+
+```
+Open -> In Progress -> Fixed -> Verified -> Closed
+Fixed -> Reopened, Verified -> Reopened, Reopened -> In Progress
+```
+
+Closed is final. The detail page only offers allowed next statuses, and the
+backend rejects anything else (for example Open -> Closed) with HTTP 400.
+
 ## Known limitations (current build)
 
-- Issues can be created and listed, but not yet edited or moved between statuses.
-- The status log table is seeded but not yet shown.
-- Tests, ARCHITECTURE.md and ACCESSIBILITY.md are still to come.
+- Accessibility self-check (keyboard pass, axe, NVDA) not yet recorded.
+- ARCHITECTURE.md and ACCESSIBILITY.md not yet written.
