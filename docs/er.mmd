@@ -1,1 +1,57 @@
-%% er diagram — todo
+---
+title: a11yTrack - data model (TEAMS, ATTACHMENTS, users.email and *.team_id are production only; local build has USERS, ISSUES, STATUS_CHANGES)
+---
+erDiagram
+  TEAMS ||--o{ USERS : "has members (users.team_id)"
+  TEAMS }o--|| USERS : "led by (teams.lead_user_id)"
+  TEAMS ||--o{ ISSUES : "scopes (issues.team_id)"
+  USERS ||--o{ ISSUES : "owns (issues.owner_id)"
+  USERS ||--o{ STATUS_CHANGES : "made (changed_by)"
+  ISSUES ||--o{ STATUS_CHANGES : "has log of"
+  ISSUES ||--o{ ATTACHMENTS : "has"
+  USERS ||--o{ ATTACHMENTS : "uploaded (uploaded_by)"
+
+  TEAMS {
+    int id PK "PROD ONLY"
+    string name "NOT NULL, UNIQUE"
+    int lead_user_id FK "NOT NULL -> users.id; receives Critical emails"
+  }
+
+  USERS {
+    int id PK
+    string display_name "NOT NULL"
+    int team_id FK "PROD ONLY -> teams.id"
+    string email "PROD ONLY, NOT NULL, UNIQUE"
+  }
+
+  ISSUES {
+    int id PK
+    int owner_id FK "NOT NULL -> users.id; every query scoped by this"
+    int team_id FK "PROD ONLY -> teams.id"
+    string title "NOT NULL"
+    text description "nullable"
+    string page_url "NOT NULL, http/https (validate_issue)"
+    string wcag_criterion "nullable, e.g. 1.1.1 Non-text content"
+    string severity "NOT NULL; local: validate_issue(); prod: CHECK / enum (Minor, Moderate, Serious, Critical)"
+    string status "NOT NULL, default Open; local: ALLOWED_TRANSITIONS; prod: CHECK / enum"
+    int version "NOT NULL, default 1; optimistic lock, +1 per write"
+    datetime created_at "NOT NULL"
+    datetime updated_at "NOT NULL"
+  }
+
+  STATUS_CHANGES {
+    int id PK
+    int issue_id FK "NOT NULL -> issues.id"
+    int changed_by FK "NOT NULL -> users.id"
+    string from_status "NOT NULL (creation is not a status change)"
+    string to_status "NOT NULL"
+    datetime changed_at "NOT NULL; written in same transaction as the status update"
+  }
+
+  ATTACHMENTS {
+    int id PK "PROD ONLY"
+    int issue_id FK "NOT NULL -> issues.id"
+    string storage_key "NOT NULL; object storage key"
+    int uploaded_by FK "NOT NULL -> users.id"
+    datetime created_at "NOT NULL"
+  }

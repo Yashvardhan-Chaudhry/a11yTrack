@@ -44,6 +44,9 @@ Submit = reply to Archit's email with the repo link (reviewer access granted).
   status, version (optimistic lock), created_at, updated_at
 - `status_changes` — id, issue_id (FK), changed_by (FK users),
   from_status, to_status, changed_at
+- Production-only (on the ER diagram, not built locally): `teams` (id, name,
+  lead_user_id), `users.team_id`, `users.email`, `issues.team_id`,
+  `attachments` (id, issue_id, storage_key, uploaded_by, created_at).
 
 ## Status workflow (locked)
 ```

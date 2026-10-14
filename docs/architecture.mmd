@@ -1,1 +1,48 @@
-%% architecture diagram — todo
+---
+title: a11yTrack - production architecture (Part 1); solid = built locally in Part 2, dashed = production only
+---
+flowchart LR
+  classDef local fill:#e8f1fb,stroke:#0b3d91,stroke-width:2px,color:#000
+  classDef prod fill:#fff4e5,stroke:#8a4b00,stroke-width:2px,stroke-dasharray:6 3,color:#000
+
+  Legend["Legend<br/>solid box / solid arrow = built locally in Part 2 (also in prod)<br/>dashed box / dashed arrow = production only"]
+
+  Browser["Browser<br/>keyboard + screen reader"]:::local
+
+  subgraph Edge["Edge (production only)"]
+    direction TB
+    CDN["CDN / static assets<br/>style.css"]:::prod
+    LB["Load balancer + TLS<br/>nginx"]:::prod
+  end
+
+  IdP["Identity provider<br/>SSO / OIDC"]:::prod
+
+  subgraph AppTier["Application tier"]
+    App["Flask + Jinja2 app<br/>routes, validate_issue(), ALLOWED_TRANSITIONS,<br/>owner_id scoping, version check<br/>local: 1 process, seeded users, signed session cookie<br/>prod: N gunicorn replicas (stateless)"]:::local
+  end
+
+  DB[("Primary database<br/>local: SQLite | prod: PostgreSQL<br/>users, issues, status_changes<br/>prod adds: teams, attachments")]:::local
+
+  subgraph Async["Async (production only, brief s.7)"]
+    direction LR
+    Queue["Job queue<br/>Redis / RQ"]:::prod
+    Worker["Worker"]:::prod
+    Mail["Email provider<br/>SMTP"]:::prod
+  end
+
+  Store["Object storage (S3)<br/>screenshot attachments"]:::prod
+
+  Browser -- "local: GET/POST HTML forms + session cookie (HTTP :5000)" --> App
+  Browser -. "prod: GET/POST HTML forms + session cookie (HTTPS)" .-> LB
+  Browser -. "prod: GET style.css" .-> CDN
+  LB -. "proxied HTTP request" .-> App
+  Browser <-. "login redirect / ID token (OIDC)" .-> IdP
+  IdP -. "ID token verified, app sets session cookie" .-> App
+  App -- "one SQL transaction: insert/update issue (WHERE version=?) + insert status_change" --> DB
+  App -- "HTTP response (via LB in prod): HTML with error summary (focus) + aria-live status region" --> Browser
+  App -. "after commit: enqueue critical_issue_created {issue_id} (non-blocking)" .-> Queue
+  Queue -. "dequeue job" .-> Worker
+  Worker -. "read issue + teams.lead_user_id, users.email" .-> DB
+  Worker -. "send 'Critical issue created' email to team lead" .-> Mail
+  App -. "pre-signed upload / download URL; attachments row in DB" .-> Store
+  Browser -. "PUT screenshot via pre-signed URL" .-> Store

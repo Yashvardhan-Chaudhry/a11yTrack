@@ -1,1 +1,27 @@
-%% workflow diagram — todo
+---
+title: a11yTrack - issue status workflow
+---
+stateDiagram-v2
+  direction LR
+  [*] --> Open : issue created
+  Open --> InProgress : start work
+  InProgress --> Fixed : fix applied
+  Fixed --> Verified : fix confirmed
+  Verified --> Closed : close
+  Fixed --> Reopened : fix did not hold
+  Verified --> Reopened : regression found
+  Reopened --> InProgress : start work again
+  Closed --> [*]
+
+  state "In Progress" as InProgress
+
+  note right of Closed
+    Closed is final: a regression on a
+    closed issue is a new issue that
+    links to the old one.
+
+    Blocked example: Open -> Closed.
+    Nothing closes without Fixed + Verified.
+    Backend rejects any transition not in
+    ALLOWED_TRANSITIONS with HTTP 400.
+  end note
