@@ -7,10 +7,9 @@ local build in this repository. The two are kept consistent on purpose: the loca
 app is the production app with the edge, identity, queue and object-storage tiers
 left out, not a different design.
 
-Diagrams were drawn in Mermaid, edited and exported with the Mermaid Live Editor.
-Sources are in `docs/*.mmd` next to the PNGs so they can be changed on the call.
-In every diagram, **solid boxes and arrows are built locally in Part 2** (and also
-exist in production) and **dashed boxes and arrows are production-only**.
+Diagrams were drawn in Mermaid and exported from the Mermaid Live Editor; sources are
+in `docs/*.mmd` beside the PNGs. In every diagram, **solid = built locally in Part 2**
+(and present in production), **dashed = production-only**.
 
 ## 1. Architecture diagram
 
@@ -44,10 +43,6 @@ the critical-issue email (section 7). The request never waits on SMTP.
 **Object storage (production only).** S3-style storage for screenshot attachments,
 written and read by the browser through pre-signed URLs so bytes never pass through
 the app replicas.
-
-Deliberately absent: a read replica (read-after-write staleness on the
-create-then-list flow) and a page cache (per-user, per-filter pages have a low hit
-rate). Both are discussed in section 6.
 
 ## 2. Request flows
 
@@ -96,9 +91,9 @@ Both flows below are the code in `routes.py`, step by step.
 The local build has `users`, `issues` and `status_changes` exactly as in `models.py`.
 Production adds `teams` (`id`, `name`, `lead_user_id`), `users.team_id`,
 `users.email`, `issues.team_id` and `attachments` (`id`, `issue_id`, `storage_key`,
-`uploaded_by`, `created_at`). They exist for the 500-team scale, the team-lead email
-and screenshots (section 7); none are built locally because the brief forbids real
-personal data and the local app has no teams.
+`alt_text`, `uploaded_by`, `created_at`). They exist for the 500-team scale, the
+team-lead email and screenshots (section 7) and are out of scope for Part 2, which has
+no teams or attachments.
 
 **Constraints.** `title`, `page_url`, `severity`, `status`, `owner_id` are NOT NULL.
 `severity` and `status` are validated in code locally and would be `CHECK`
@@ -145,12 +140,10 @@ Any route also returns 405 for an unsupported method (Flask default) and 302 to
 **How ownership is enforced.** There is one gate, `get_owned_issue_or_404()`, and
 every per-issue route calls it first. It queries `Issue WHERE id = ? AND owner_id =
 current_user.id`. Not found and not owned are both 404, never 403, so a user cannot
-learn whether another user's issue id exists. As belt and braces, the `UPDATE`
-statements in edit and status repeat `owner_id = ?` in their `WHERE` clause, so even
-a bug in the gate could not write another user's row. The list query is scoped the
-same way. Tests in `tests/test_ownership.py` hit every route with the other user's
-id. In production the same checks run per request on the identity from the verified
-session; team-scoped reads would add `team_id = ?` alongside `owner_id`.
+learn whether another user's issue id exists. The list query and the `UPDATE`
+statements are scoped by `owner_id` the same way. Tests in `tests/test_ownership.py`
+hit every per-issue route with the other user's id. In production the same checks run
+on the identity from the verified session.
 
 **Known gap.** The forms carry no CSRF token. Current browsers treat the session
 cookie as `SameSite=Lax` by default, which blocks cross-site POSTs, but a token is the
@@ -186,10 +179,8 @@ sets version 4; user B's update matches zero rows and gets 409 with the reload
 message, sees A's change and the new buttons, and decides again. No lock is held
 between page load and submit, no change is silently lost, and the `status_changes`
 row is inserted only on the winning path. Optimistic locking fits because conflicts
-are rare and the cost of a retry is one page load; pessimistic row locks would hold
-database resources across a human think-time. The same rule guards the edit form.
-Locally the two users are two browser tabs of the same seeded user; in production
-`owner_id` becomes team-scoped and the mechanism is unchanged.
+are rare and a retry costs one page load; row locks would be held across human
+think-time. The same rule guards the edit form.
 
 ## 6. Scale and reliability
 
@@ -197,8 +188,9 @@ Locally the two users are two browser tabs of the same seeded user; in productio
 is an unbounded `SELECT ... ORDER BY created_at DESC` per user. With the
 `(owner_id, created_at)` index the scan is proportional to that user's issues, not
 the table, but a user or team with thousands of issues still gets a huge page. The
-fix is keyset pagination on `(created_at, id)`, which rides the same index, plus
-the filter columns in a second index once the team queue exists. The history table
+fix is keyset pagination on `(created_at, id)`, which rides the same index. The
+`?status=` and `?severity=` filters are applied row by row within that range today;
+`(owner_id, status, created_at)` is the next index once filtered views dominate. The history table
 grows faster than issues (several rows per issue) and is read only by issue id, so
 its composite index keeps it flat.
 
@@ -209,16 +201,16 @@ call inside that transaction, which is why the critical-issue email is queued af
 the commit (section 7). Stateless replicas behind the load balancer scale the HTML
 rendering horizontally, and signed-cookie sessions mean no shared session store.
 
-**Caching and replicas.** Not in v1. A read replica would make the create-then-redirect
-flow show a list without the issue just created unless reads are routed by
-recency. A page cache for per-user, per-filter list pages has a low hit rate and
-invalidate-on-write is where bugs live. Candidates that would be cached first: the
-WCAG criteria list (static) and per-team counts.
+**Caching and replicas.** Not in v1. A read replica would let the create-then-redirect
+flow show a list without the issue just created, and per-user, per-filter list pages
+cache badly and invalidate dangerously. First candidates when needed: the static WCAG
+criteria list and per-team counts.
 
 **Database briefly unavailable.** In production the pool is configured with
 `pool_pre_ping` so a dead connection is detected before a query. A failed request
-returns a titled 503 page saying the save did not happen; nothing is written outside the transaction, so
-there is no partial state. Queued email jobs retry with backoff and are keyed by
+would return a titled 503 page saying the save did not happen (the local build has no
+such handler yet, so the exception surfaces as a 500); nothing is written outside the
+transaction, so there is no partial state. Queued email jobs retry with backoff and are keyed by
 issue id so a retry cannot send twice. Locally SQLite's file lock raises the same
 `OperationalError` path.
 
@@ -228,8 +220,8 @@ issue id so a retry cannot send twice. Locally SQLite's file lock raises the sam
 storage. The app issues a pre-signed `PUT` URL, the browser uploads directly, then the
 app records `storage_key`, `issue_id`, `uploaded_by`. Downloads are pre-signed `GET`
 URLs behind the same ownership gate. Bytes never pass through the app replicas, so
-upload bursts do not compete with page renders. Each image needs a text description
-field for the screen-reader user on the receiving end.
+upload bursts do not compete with page renders. The `alt_text` column is required so
+every screenshot carries a description for the screen-reader user who reads the issue.
 
 **Email to the team lead.** When a Critical issue is created, the request handler
 enqueues `critical_issue_created {issue_id}` on the Redis queue **after** the commit,
@@ -265,10 +257,6 @@ The templates turn each into something a screen reader reaches:
   the node once after page load because NVDA otherwise misses content present at load
   (details and test log in `ACCESSIBILITY.md`).
 
-Because the contract is a plain dict of sentences, a JSON API for a future
-single-page front end would return `{"errors": {"page_url": "..."}}` and the client
-could render the identical summary; the sentences would not need to change.
-
 ## 9. Technology choices
 
 | Layer | Local (Part 2) | Production | Why they differ |
@@ -283,7 +271,6 @@ could render the identical summary; the sentences would not need to change.
 JSON API and typed schemas, but moves page titles, focus management and status
 announcements into client code, where they must be rebuilt by hand and tested per
 route. For a product whose grade is its accessibility, server-rendered pages make the
-WCAG basics the browser's job. The cost is full page loads and no optimistic UI,
-which this workload does not need.
+WCAG basics the browser's job.
 
 Full reasoning for each decision, in the order they were made, is in `DECISIONS.md`.
