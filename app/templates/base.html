@@ -27,23 +27,27 @@
       </ul>
     </nav>
   </header>
-  <div class="status" role="status" aria-live="polite">
-    {% for message in get_flashed_messages() %}
-      <p>{{ message }}</p>
-    {% endfor %}
-  </div>
   <main id="main" tabindex="-1">
+    <div class="status" role="status" aria-live="assertive" aria-atomic="true">
+      {% for message in get_flashed_messages() %}
+        <p>{{ message }}</p>
+      {% endfor %}
+    </div>
     {% block content %}{% endblock %}
   </main>
   <script>
-    // Re-insert any page-load message into the live region so screen readers
-    // announce it. Content already present at load is often not announced.
+    // Re-announce any page-load message. The box stays in the DOM from the start so it
+    // is in reading order; after the screen reader has finished the page title we
+    // remove and re-insert it so it fires as a live-region change (NVDA + Chrome drop
+    // live updates that arrive during page-load speech, and ignore content present at load).
     (function () {
       var region = document.querySelector('.status');
       if (!region || !region.textContent.trim()) return;
       var html = region.innerHTML;
-      region.innerHTML = '';
-      setTimeout(function () { region.innerHTML = html; }, 150);
+      setTimeout(function () {
+        region.innerHTML = '';
+        setTimeout(function () { region.innerHTML = html; }, 50);
+      }, 1000);
     })();
   </script>
 </body>

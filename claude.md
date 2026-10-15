@@ -92,7 +92,12 @@ a11ytrack/
 - Accessibility pass done: live-region re-announce script (only JS in app),
   "Error: " page-title prefix on error states, 4-column list for 320px,
   two-ring focus indicator, axe run on every page state.
-- Not yet: ARCHITECTURE.md, ACCESSIBILITY.md (NVDA findings), final README + AI note.
+- NVDA pass done (15 Oct): three flags; two fixed (live region now inside main,
+  assertive, re-announced after 1 s; error summary role=group + aria-labelledby),
+  one documented (focus ring vs browse cursor). axe 4.13.0: 16 page states,
+  0 violations. ACCESSIBILITY.md written; pending user input: Lighthouse scores,
+  Speech Viewer retest lines for flags 2 and 3.
+- Not yet: ARCHITECTURE.md, final README + AI note.
 
 ## Planner (revised 18:40 Wed; ~2h behind original)
 | Slot | Task | Done when |

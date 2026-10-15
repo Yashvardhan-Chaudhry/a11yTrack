@@ -4,8 +4,8 @@
   <h1>{{ issue.title }}</h1>
 
   {% if error %}
-    <div id="error-summary" class="error-summary" tabindex="-1" autofocus role="alert">
-      <h2>There is a problem</h2>
+    <div id="error-summary" class="error-summary" tabindex="-1" autofocus role="group" aria-labelledby="error-summary-heading">
+      <h2 id="error-summary-heading">There is a problem</h2>
       <p>{{ error }}
         {% if 'Reload' in error %}<a href="{{ url_for('main.issue_detail', issue_id=issue.id) }}">Reload this page</a>{% endif %}
       </p>

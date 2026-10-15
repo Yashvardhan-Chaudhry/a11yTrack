@@ -4,8 +4,8 @@
   <h1>{{ 'Edit issue' if mode == 'edit' else 'New issue' }}</h1>
 
   {% if errors or conflict %}
-    <div id="error-summary" class="error-summary" tabindex="-1" autofocus role="alert">
-      <h2>There is a problem</h2>
+    <div id="error-summary" class="error-summary" tabindex="-1" autofocus role="group" aria-labelledby="error-summary-heading">
+      <h2 id="error-summary-heading">There is a problem</h2>
       {% if conflict %}
         <p>This issue was changed since you loaded it.
           <a href="{{ url_for('main.issue_edit', issue_id=issue.id) }}">Reload the edit page</a>
