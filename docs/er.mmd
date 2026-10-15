@@ -26,8 +26,8 @@ erDiagram
 
   ISSUES {
     int id PK
-    int owner_id FK "NOT NULL -> users.id; every query scoped by this"
-    int team_id FK "PROD ONLY -> teams.id"
+    int owner_id FK "NOT NULL -> users.id; every query scoped by this; INDEX ix_issues_owner_created (owner_id, created_at)"
+    int team_id FK "PROD ONLY -> teams.id; PROD INDEX (team_id, status)"
     string title "NOT NULL"
     text description "nullable"
     string page_url "NOT NULL, http/https (validate_issue)"
@@ -35,13 +35,13 @@ erDiagram
     string severity "NOT NULL; local: validate_issue(); prod: CHECK / enum (Minor, Moderate, Serious, Critical)"
     string status "NOT NULL, default Open; local: ALLOWED_TRANSITIONS; prod: CHECK / enum"
     int version "NOT NULL, default 1; optimistic lock, +1 per write"
-    datetime created_at "NOT NULL"
+    datetime created_at "NOT NULL; list sort key, second column of ix_issues_owner_created"
     datetime updated_at "NOT NULL"
   }
 
   STATUS_CHANGES {
     int id PK
-    int issue_id FK "NOT NULL -> issues.id"
+    int issue_id FK "NOT NULL -> issues.id; INDEX ix_status_changes_issue_changed (issue_id, changed_at)"
     int changed_by FK "NOT NULL -> users.id"
     string from_status "NOT NULL (creation is not a status change)"
     string to_status "NOT NULL"

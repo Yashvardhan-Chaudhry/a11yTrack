@@ -11,6 +11,7 @@ from functools import wraps
 
 from flask import (
     Blueprint,
+    current_app,
     flash,
     g,
     redirect,
@@ -143,6 +144,15 @@ def issue_new():
             )
             db.session.add(issue)
             db.session.commit()
+            if issue.severity == "Critical":
+                # Production enqueues a team-lead email here, after the commit so a
+                # rolled-back issue never notifies anyone. Locally we only log it.
+                current_app.logger.info(
+                    "Critical issue %s created by user %s; production would enqueue "
+                    "a team-lead email",
+                    issue.id,
+                    user.id,
+                )
             flash("Issue saved.")
             return redirect(url_for("main.issue_detail", issue_id=issue.id))
     return (

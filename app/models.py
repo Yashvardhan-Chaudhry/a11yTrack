@@ -22,7 +22,7 @@ class Issue(db.Model):
     __tablename__ = "issues"
 
     id = db.Column(db.Integer, primary_key=True)
-    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=True)
     page_url = db.Column(db.String(2000), nullable=False)
@@ -38,12 +38,15 @@ class Issue(db.Model):
         "StatusChange", back_populates="issue", order_by="StatusChange.changed_at"
     )
 
+    # Matches the list query: WHERE owner_id = ? ORDER BY created_at DESC.
+    __table_args__ = (db.Index("ix_issues_owner_created", "owner_id", "created_at"),)
+
 
 class StatusChange(db.Model):
     __tablename__ = "status_changes"
 
     id = db.Column(db.Integer, primary_key=True)
-    issue_id = db.Column(db.Integer, db.ForeignKey("issues.id"), nullable=False, index=True)
+    issue_id = db.Column(db.Integer, db.ForeignKey("issues.id"), nullable=False)
     changed_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     from_status = db.Column(db.String(20), nullable=False)
     to_status = db.Column(db.String(20), nullable=False)
@@ -51,3 +54,6 @@ class StatusChange(db.Model):
 
     issue = db.relationship("Issue", back_populates="status_changes")
     actor = db.relationship("User")
+
+    # Matches the detail page: WHERE issue_id = ? ORDER BY changed_at.
+    __table_args__ = (db.Index("ix_status_changes_issue_changed", "issue_id", "changed_at"),)

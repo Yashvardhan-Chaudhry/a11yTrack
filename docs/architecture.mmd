@@ -32,15 +32,15 @@ flowchart LR
 
   Store["Object storage (S3)<br/>screenshot attachments"]:::prod
 
-  Browser -- "local: GET/POST HTML forms + session cookie (HTTP :5000)" --> App
+  Browser -- "local: GET/POST HTML forms + session cookie (HTTP :5000); Flask also serves /static" --> App
   Browser -. "prod: GET/POST HTML forms + session cookie (HTTPS)" .-> LB
   Browser -. "prod: GET style.css" .-> CDN
   LB -. "proxied HTTP request" .-> App
   Browser <-. "login redirect / ID token (OIDC)" .-> IdP
   IdP -. "ID token verified, app sets session cookie" .-> App
-  App -- "one SQL transaction: insert/update issue (WHERE version=?) + insert status_change" --> DB
+  App -- "one transaction per request: create = INSERT issues; edit = UPDATE issues WHERE id AND owner_id AND version; status = same UPDATE + INSERT status_changes" --> DB
   App -- "HTTP response (via LB in prod): HTML with error summary (focus) + aria-live status region" --> Browser
-  App -. "after commit: enqueue critical_issue_created {issue_id} (non-blocking)" .-> Queue
+  App -. "prod: after commit, enqueue critical_issue_created {issue_id} (non-blocking) | local: one log line" .-> Queue
   Queue -. "dequeue job" .-> Worker
   Worker -. "read issue + teams.lead_user_id, users.email" .-> DB
   Worker -. "send 'Critical issue created' email to team lead" .-> Mail
