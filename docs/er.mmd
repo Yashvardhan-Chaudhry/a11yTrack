@@ -1,5 +1,8 @@
 ---
 title: a11yTrack - data model (TEAMS, ATTACHMENTS, users.email and *.team_id are production only; local build has USERS, ISSUES, STATUS_CHANGES)
+config:
+  themeVariables:
+    fontFamily: Arial, Helvetica, sans-serif
 ---
 erDiagram
   TEAMS ||--o{ USERS : "has members (users.team_id)"
@@ -52,6 +55,7 @@ erDiagram
     int id PK "PROD ONLY"
     int issue_id FK "NOT NULL -> issues.id"
     string storage_key "NOT NULL; object storage key"
+    string alt_text "NOT NULL; text description read in place of the image"
     int uploaded_by FK "NOT NULL -> users.id"
     datetime created_at "NOT NULL"
   }

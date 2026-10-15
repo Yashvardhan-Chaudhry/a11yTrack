@@ -1,5 +1,8 @@
 ---
 title: a11yTrack - issue status workflow
+config:
+  themeVariables:
+    fontFamily: Arial, Helvetica, sans-serif
 ---
 stateDiagram-v2
   direction LR
@@ -16,12 +19,13 @@ stateDiagram-v2
   state "In Progress" as InProgress
 
   note right of Closed
-    Closed is final: a regression on a
+    Closed is final. A regression on a
     closed issue is a new issue that
     links to the old one.
 
-    Blocked example: Open -> Closed.
-    Nothing closes without Fixed + Verified.
-    Backend rejects any transition not in
-    ALLOWED_TRANSITIONS with HTTP 400.
+    Blocked example: Open to Closed.
+    Nothing closes without Fixed and
+    Verified. The backend rejects any
+    transition not in ALLOWED_TRANSITIONS
+    with HTTP 400.
   end note
