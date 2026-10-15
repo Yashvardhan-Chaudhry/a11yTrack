@@ -186,6 +186,7 @@ focus is still at the top of the page.
   and Firefox expose the suggestions to NVDA; Safari support is weaker.
 - Screen reader testing was NVDA + Chrome only. Not tested with JAWS,
   VoiceOver or Firefox.
-- Zoom and 320 px checks were done in Chrome only.
+- Zoom and 320 px checks were done in Chrome only. All page states were
+  walked, including the 404 and 409 pages.
 - Sign-in is a "sign in as" picker with no password, by the brief's ground
   rules, so no real authentication flow was tested for accessibility.
