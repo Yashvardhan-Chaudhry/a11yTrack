@@ -75,13 +75,17 @@ it.
 
 ### Lighthouse
 
-<!-- TODO(user): paste Accessibility scores for: issue list, new issue with errors, issue detail. -->
+Desktop, Accessibility category only. Lighthouse runs a subset of the same axe
+rules, so it is a second opinion rather than a new check; it also lists ten
+manual items (tab order, focus not trapped, focus directed to new content, and
+so on) that are covered by sections 2 and 4.
 
 | Page | Accessibility score |
 |---|---|
-| Issue list | _pending_ |
-| New issue with validation errors | _pending_ |
-| Issue detail | _pending_ |
+| Sign in | 100 |
+| Issue list | 100 |
+| New issue | 100 |
+| Issue detail | 100 |
 
 ### Colour contrast
 
