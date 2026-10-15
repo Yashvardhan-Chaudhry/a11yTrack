@@ -78,8 +78,9 @@ a11ytrack/
 
 ## Local tooling (verified working)
 - Python 3.14 venv at `.venv` → `.venv\Scripts\activate`, `python run.py`
-- axe CLI: `axe http://127.0.0.1:5000/path --chromedriver-path <chromedriver 154 exe> --chrome-options="headless,no-sandbox"`
-  (bundled chromedriver is 155, installed Chrome is 154 — hence the explicit path)
+- axe CLI: `axe http://127.0.0.1:5000/path --chrome-options="headless,no-sandbox"`
+  (Chrome auto-updated to 155 on 15 Oct, matching the bundled chromedriver; no explicit driver path needed now)
+- Signed-in page states for axe: render via Flask test client to static HTML, run axe on `file:///C:/...` URLs
 - NVDA 2026.2 at `C:\Program Files\NVDA\nvda.exe` (winget); Lighthouse via Chrome DevTools
 
 ## Current state

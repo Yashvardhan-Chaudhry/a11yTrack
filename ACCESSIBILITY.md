@@ -28,7 +28,7 @@ Space and the arrow keys only.
 | Flow | Result |
 |---|---|
 | First Tab on every page lands on "Skip to main content"; Enter moves focus into `<main>` and the next Tab is the first control inside it | Pass |
-| Sign in: select user with arrows, Enter submits; submitting with no user shows an error, focus lands on it | Pass |
+| Sign in: select user with arrows, Enter submits; submitting with no user shows an inline error and focus moves to the select, which is marked invalid and described by the error text | Pass |
 | Issue list: filters (two selects + Apply + Clear) and every title link reachable in visual order | Pass |
 | Create issue: every field, Save and Cancel reachable; nothing skipped or hit twice | Pass |
 | Create with empty fields: focus lands on the error summary; each summary link moves focus to its field | Pass |
@@ -38,6 +38,16 @@ Space and the arrow keys only.
 | Sign out, sign in as the other user: first user's issues absent; typed URL of the other user's issue gives the 404 page with heading, "Error:" title and a link back | Pass |
 | Focus ring visible on every focusable element including selects, table links and the blue buttons (two-ring indicator: 3 px dark outline plus 2 px white inner ring) | Pass |
 | No keyboard trap anywhere; Shift+Tab reverses cleanly | Pass |
+
+### Reflow (320 px and 200 % zoom)
+
+Checked in Chrome on every page state, including the validation-error, 400,
+409 and 404 pages.
+
+| Check | Result |
+|---|---|
+| 320 px wide (DevTools device toolbar): header and filter bar wrap onto new lines; the issue table keeps its four columns and wraps long text inside cells (`overflow-wrap: anywhere`); no horizontal page scroll and no clipped content | Pass |
+| 200 % zoom (Ctrl+Plus) at a normal window width: same wrapping behaviour; forms, buttons and the error summary stay fully visible; no sideways scroll | Pass |
 
 ## 3. Automated checks
 
@@ -150,10 +160,12 @@ later. NVDA builds its reading buffer from the DOM as loaded, so the box was
 empty in the reading pass, and the 150 ms re-insertion was a polite
 live-region update that fired while NVDA was still speaking the title, so it
 was dropped. Fix: the box now lives inside `<main>` above the heading so it
-is in reading order and reachable with D; it is `aria-live="assertive"` so it
-can interrupt page-load speech; its content is never blanked at load; and it
-is removed and re-inserted once after one second so it fires as a real
-change. Focus does not move.
+is in reading order and reachable with D. The element is
+`role="status" aria-live="assertive" aria-atomic="true"`: the role is kept for
+semantics and assertive overrides the role's default politeness so it can
+interrupt page-load speech. The message is present in the HTML at load, so it
+is in reading order. After one second the node is detached and re-attached
+once, which NVDA treats as a change and announces. Focus does not move.
 Retest after the fix: "Issue saved." and "Status changed from Open to In
 Progress." are both spoken after the page title with no key pressed, and
 focus is still at the top of the page.
@@ -162,15 +174,26 @@ focus is still at the top of the page.
 
 | Brief bullet | Where |
 |---|---|
-| Keyboard for every button, link, form, filter; visible focus; tab order | Native controls in document order; `:focus-visible` two-ring style in `style.css` |
+| Keyboard for every button, link, form, filter; visible focus; tab order | Native controls in document order; `:focus-visible` two-ring style in `style.css`; links underlined (browser default, not reset) |
 | Visible label on every input; required in text | `<label for>` on every field; "(required)" inside the label text |
-| Errors in text next to the field, findable by screen reader | `validation.py` returns `{field: message}`; template renders inline `<p id="field-error">` wired with `aria-describedby`/`aria-invalid`, plus a focused summary |
-| Messages announced without moving focus | Flask `flash()` → `role="status"` live region in `base.html` |
+| Errors in text next to the field, findable by screen reader | `validation.py` returns `{field: message}`; template renders inline `<p id="field-error">` wired with `aria-describedby`/`aria-invalid`, plus a summary that receives focus through `tabindex="-1"` + `autofocus` (no script); sign-in moves focus to the invalid select |
+| Messages announced without moving focus | Flask `flash()` → `role="status" aria-live="assertive" aria-atomic="true"` region in `base.html`, re-attached once after 1 s by the only script in the app (section 4, flag 3) |
 | Severity and status shown as words | Plain text in table cells, detail list and button labels; no colour-only badges |
 | One h1, heading order, per-page title, skip link | `{% block title %}` per template, "Error: " prefix on error states, one `<h1>` per page, skip link first in `<body>` |
 | Native controls; list as a real table | `<table>` with `<caption>`, `<th scope="col">` and `<th scope="row">`; `<select>`, `<button>`, `<input list>` + `<datalist>` |
 | Contrast 4.5:1 text, 3:1 UI | Table in section 3 |
-| 320 px and 200 % zoom | Flex-wrapping header and filters, 4-column table, no fixed widths; see section 2 |
+| 320 px and 200 % zoom | Flex-wrapping header and filters, 4-column table with wrapping cells, no fixed widths; results in section 2, "Reflow" |
+
+### WCAG 2.2-specific criteria
+
+The 2.2 additions that apply to this app, checked by hand:
+
+| Criterion | How it is met |
+|---|---|
+| 2.4.11 Focus Not Obscured (Minimum) | No sticky or fixed header, footer or overlay, so nothing can cover a focused element |
+| 2.5.8 Target Size (Minimum) | Buttons are about 44 px tall (0.5 rem padding on 1.5 line-height text); inline links in table cells and prose are exempt under the inline exception |
+| 3.3.7 Redundant Entry | Validation errors and the 409 response re-render the form with the typed values; the edit form is prefilled |
+| 3.3.8 Accessible Authentication (Minimum) | Sign-in is a user picker with no password, CAPTCHA or memory test |
 
 ## 6. Remaining issues and honest limitations
 
@@ -186,7 +209,6 @@ focus is still at the top of the page.
   and Firefox expose the suggestions to NVDA; Safari support is weaker.
 - Screen reader testing was NVDA + Chrome only. Not tested with JAWS,
   VoiceOver or Firefox.
-- Zoom and 320 px checks were done in Chrome only. All page states were
-  walked, including the 404 and 409 pages.
+- Zoom and 320 px checks were done in Chrome only.
 - Sign-in is a "sign in as" picker with no password, by the brief's ground
   rules, so no real authentication flow was tested for accessibility.

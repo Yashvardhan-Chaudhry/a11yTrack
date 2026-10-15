@@ -7,7 +7,7 @@
     <div class="field">
       <label for="user_id">Sign in as (required)</label>
       {% if error %}<p id="user_id-error" class="error">{{ error }}</p>{% endif %}
-      <select id="user_id" name="user_id" {% if error %}aria-describedby="user_id-error" aria-invalid="true"{% endif %}>
+      <select id="user_id" name="user_id" {% if error %}autofocus aria-describedby="user_id-error" aria-invalid="true"{% endif %}>
         <option value="">Choose a user</option>
         {% for user in users %}
           <option value="{{ user.id }}">{{ user.display_name }}</option>
