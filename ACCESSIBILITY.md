@@ -112,7 +112,7 @@ cells), F (form fields), NVDA+T (title).
 |---|---|
 | Every input has a visible label; required marked in text | Each field announced with its label and "required" as part of the label text, e.g. "Title (required), edit" |
 | Errors next to the field, findable by a screen reader user | Invalid fields announced as "invalid" with the error text read via `aria-describedby`; focus moved to the summary on load (see flag 2) |
-| Status messages announced without moving focus | Not announced in the first build (see flag 3). Fixed; focus stays at the top of the page |
+| Status messages announced without moving focus | Not announced in the first build (see flag 3). Fixed and retested; focus stays at the top of the page |
 | Severity and status as words | Table cells and transition buttons read as words ("Serious", "Mark as In Progress, button") |
 | One h1, sensible heading order, title changes per page | H walks h1 then h2s in order on every page; NVDA+T gives a distinct title per page and "Error:" is spoken first on error states |
 | Skip link | First Tab reads "Skip to main content, link"; Enter lands in main |
@@ -135,8 +135,8 @@ the role name and the "There is a problem" heading was lost. Changed to
 on load, so NVDA now reads "There is a problem, grouping" and then the list of
 errors. NVDA also says "same page link" for each error link; that is correct
 behaviour for in-page anchors and was left alone.
-<!-- TODO(user): paste Speech Viewer lines after retest. -->
-Retest: _pending_.
+Retest after the fix: on submitting an empty form NVDA reads the heading
+and then the error list; no "alert" prefix.
 
 **Flag 3: "Issue saved." and "Status changed from X to Y." were never spoken.**
 Reproduced: after submitting, NVDA read the new page title and started reading
@@ -150,8 +150,9 @@ is in reading order and reachable with D; it is `aria-live="assertive"` so it
 can interrupt page-load speech; its content is never blanked at load; and it
 is removed and re-inserted once after one second so it fires as a real
 change. Focus does not move.
-<!-- TODO(user): paste Speech Viewer lines after retest. -->
-Retest: _pending_.
+Retest after the fix: "Issue saved." and "Status changed from Open to In
+Progress." are both spoken after the page title with no key pressed, and
+focus is still at the top of the page.
 
 ## 5. Brief checklist, where each point is met
 
