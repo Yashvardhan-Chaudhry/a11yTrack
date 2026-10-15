@@ -22,7 +22,14 @@
     <dt>WCAG criterion</dt>
     <dd>{{ issue.wcag_criterion or 'Not set' }}</dd>
     <dt>Page URL</dt>
-    <dd><a href="{{ issue.page_url }}">{{ issue.page_url }}</a></dd>
+    <dd>
+      {# Validation only accepts http/https; the guard keeps a tampered row from becoming a javascript: link. #}
+      {% if issue.page_url.lower().startswith(('http://', 'https://')) %}
+        <a href="{{ issue.page_url }}">{{ issue.page_url }}</a>
+      {% else %}
+        {{ issue.page_url }}
+      {% endif %}
+    </dd>
     <dt>Created</dt>
     <dd><time datetime="{{ issue.created_at.isoformat() }}Z">{{ issue.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></dd>
     <dt>Updated</dt>

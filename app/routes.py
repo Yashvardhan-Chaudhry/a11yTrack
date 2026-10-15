@@ -74,7 +74,8 @@ def index():
 def login():
     users = User.query.order_by(User.display_name).all()
     if request.method == "POST":
-        user = db.session.get(User, request.form.get("user_id", type=int))
+        user_id = request.form.get("user_id", type=int)
+        user = db.session.get(User, user_id) if user_id else None
         if user is None:
             error = "Choose a user to sign in as."
             return render_template("login.html", users=users, error=error), 400

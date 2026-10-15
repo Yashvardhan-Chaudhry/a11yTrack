@@ -57,6 +57,18 @@ def test_create_valid_issue_redirects_to_detail(client, app):
         assert Issue.query.filter_by(title="Edited title", owner_id=ALICE).count() == 1
 
 
+def test_detail_never_links_a_non_http_url(client, app):
+    """Defence in depth: even a tampered row must not become a javascript: link."""
+    with app.app_context():
+        issue = db.session.get(Issue, ALICE_ISSUE)
+        issue.page_url = "javascript:alert(1)"
+        db.session.commit()
+    login(client, ALICE)
+    page = client.get(f"/issues/{ALICE_ISSUE}").data.decode()
+    assert 'href="javascript:' not in page
+    assert "javascript:alert(1)" in page  # still shown as text
+
+
 # ---- HTTP: edit
 
 

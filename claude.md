@@ -78,8 +78,8 @@ a11ytrack/
 
 ## Local tooling (verified working)
 - Python 3.14 venv at `.venv` → `.venv\Scripts\activate`, `python run.py`
-- axe CLI: `axe http://127.0.0.1:5000/path --chromedriver-path "C:/Users/chaud/.cache/puppeteer/chromedriver/win64-154.0.8037.57/chromedriver-win64/chromedriver.exe" --chrome-options="headless,no-sandbox"`
-  (bundled chromedriver is 155, Chrome is 154 — hence the explicit path)
+- axe CLI: `axe http://127.0.0.1:5000/path --chromedriver-path <chromedriver 154 exe> --chrome-options="headless,no-sandbox"`
+  (bundled chromedriver is 155, installed Chrome is 154 — hence the explicit path)
 - NVDA 2026.2 at `C:\Program Files\NVDA\nvda.exe` (winget); Lighthouse via Chrome DevTools
 
 ## Current state
